@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script defer src="app.js"></script>
+    <title>Jogo de Dados</title>
+</head>
+<body>
+    <div class="container">
+        <span style="--clr:white;background-color: red; padding: .5em; box-shadow: 0px 0px 10px red;" id="player-value">É a vez do jogador 1</span>
+        <span style="--clr: gold;" id="player-round-win"></span>
+        <label for="dice-value">Resultado do dado:</label>
+        <span id="dice-value"></span>
+        <div class="btn">
+            <button id="btnPlayer1">Lançar dado do jogador 1</button>
+            <button id="btnReset">Reiniciar jogo</button>
+            <button id="btnPlayer2">Lançar dado do jogador 2</button>
+        </div>
+    </div>
+</body>
+</html>
