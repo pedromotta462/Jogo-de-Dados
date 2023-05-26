@@ -23,7 +23,7 @@ const thRounds = document.createElement('th');
 thRounds.textContent = 'Rounds';
 
 //criando tabela
-trHead.appendChild(thRounds, thPlayer1);
+trHead.appendChild(thRounds);
 trHead.appendChild(thPlayer1);
 trHead.appendChild(thPlayer2);
 trHead.appendChild(thResult);
@@ -36,11 +36,10 @@ let movesPlayer1 = [];
 let movesPlayer2 = [];
 let nMoves = 0;
 let rounds = 0;
-let whoWon = [0,0]
+let whoWon = [0, 0];
 
 //setando botão inicial para desativado
 btnPlayer2.setAttribute('disabled', '');
-
 
 //função que roda dado
 function playDice(maxValue) {
@@ -73,17 +72,23 @@ function updateTable(rounds, movesPlayer1, movesPlayer2) {
     const tdResult = document.createElement('td');
     const roundWinner = whoRoundWin(movesPlayer1, movesPlayer2, rounds - 1, whoWon);
     if (roundWinner === 1) {
-      tdResult.textContent = 'Jogador 1';
+        tdResult.textContent = 'Jogador 1';
     } else if (roundWinner === 2) {
-      tdResult.textContent = 'Jogador 2';
+        tdResult.textContent = 'Jogador 2';
     } else {
-      tdResult.textContent = 'Empate';
+        tdResult.textContent = 'Empate';
     }
     tr.appendChild(thRound);
     tr.appendChild(tdPlayer1);
     tr.appendChild(tdPlayer2);
     tr.appendChild(tdResult);
     tbody.appendChild(tr);
+    
+    // Salvar dados atualizados no LocalStorage
+    localStorage.setItem('movesPlayer1', JSON.stringify(movesPlayer1));
+    localStorage.setItem('movesPlayer2', JSON.stringify(movesPlayer2));
+    localStorage.setItem('rounds', rounds.toString());
+    localStorage.setItem('whoWon', JSON.stringify(whoWon));
 }
 
 //função que decide quem ganhou
@@ -118,47 +123,90 @@ function whoIsPlaying(nMoves) {
     }
 }
 
-//adicionando os eventos aos botões
-
-btnPlayer1.addEventListener('click', () => {
+// Função que é executada ao abrir a página
+window.addEventListener('DOMContentLoaded', () => {
+    // Verificar se há dados salvos no LocalStorage
+    const savedMovesPlayer1 = localStorage.getItem('movesPlayer1');
+    const savedMovesPlayer2 = localStorage.getItem('movesPlayer2');
+    const savedNMoves = localStorage.getItem('nMoves');
+    const savedRounds = localStorage.getItem('rounds');
+    const savedWhoWon = localStorage.getItem('whoWon');
+    console.log('A aba carregou');
+  
+    console.log('savedMovesPlayer1:', savedMovesPlayer1);
+    console.log('savedMovesPlayer2:', savedMovesPlayer2);
+    console.log('savedNMoves:', savedNMoves);
+    console.log('savedRounds:', savedRounds);
+    console.log('savedWhoWon:', savedWhoWon);
+  
+    if (savedMovesPlayer1 !== null && savedMovesPlayer2 !== null && savedNMoves !== null && savedRounds !== null && savedWhoWon !== null) {
+      console.log('O if entrou!');
+      movesPlayer1 = JSON.parse(savedMovesPlayer1);
+      movesPlayer2 = JSON.parse(savedMovesPlayer2);
+      nMoves = parseInt(savedNMoves);
+      rounds = parseInt(savedRounds);
+      whoWon = JSON.parse(savedWhoWon);
+      updateTable(rounds, movesPlayer1, movesPlayer2);
+      p.textContent = `É a vez do ${whoIsPlaying(nMoves)}`;
+      console.log(movesPlayer1, movesPlayer2, rounds);
+    } else {
+      console.log('O if não entrou ou algum valor é nulo.');
+    }
+  });
+  
+  function updateGameState() {
+    localStorage.setItem('movesPlayer1', JSON.stringify(movesPlayer1));
+    localStorage.setItem('movesPlayer2', JSON.stringify(movesPlayer2));
+    localStorage.setItem('nMoves', (nMoves-1).toString());
+    localStorage.setItem('rounds', rounds.toString());
+    localStorage.setItem('whoWon', JSON.stringify(whoWon));
+  }
+  
+  //adicionando os eventos aos botões
+  
+  btnPlayer1.addEventListener('click', () => {
     let result = playDice(6);
     nMoves++;
-    let play = `É a vez do ${whoIsPlaying(nMoves+1)}`
-    console.log(nMoves, ' - ' , play)
+    let play = `É a vez do ${whoIsPlaying(nMoves + 1)}`;
+    console.log(nMoves, ' - ', play);
     lb.textContent = result;
     p.textContent = play;
     movesPlayer1.push(result);
-});
+    updateGameState();
+  });
 
-btnPlayer2.addEventListener('click', () => {
+  btnPlayer2.addEventListener('click', () => {
     let result = playDice(6);
     nMoves++;
     rounds++;
     let play = `É a vez do ${whoIsPlaying(nMoves+1)}`;
-    console.log(nMoves, ' - ' , play);
+    console.log(nMoves, ' - ', play);
     lb.textContent = result;
     p.textContent = play;
     movesPlayer2.push(result);
-    if (whoRoundWin(movesPlayer1,movesPlayer2, rounds-1, whoWon) === 3) {
-        roundWin.textContent = `O round ${rounds}º foi um empate!`;
-    }else{
-        roundWin.textContent = `O jogador ${whoRoundWin(movesPlayer1, movesPlayer2, rounds-1, whoWon)} ganhou o ${rounds}º round!`;
+    
+    if (whoRoundWin(movesPlayer1, movesPlayer2, rounds-1, whoWon) === 3) {
+      roundWin.textContent = `O round ${rounds}º foi um empate!`;
+    } else {
+      roundWin.textContent = `O jogador ${whoRoundWin(movesPlayer1, movesPlayer2, rounds-1, whoWon)} ganhou o ${rounds}º round!`;
     }
-    console.log("Resultado: jogador 1:", movesPlayer1, " jogador 2:", movesPlayer2)
+    
+    console.log("Resultado: jogador 1:", movesPlayer1, " jogador 2:", movesPlayer2);
+    
     updateTable(rounds, movesPlayer1, movesPlayer2);
-    if(rounds === 10){
-        btnReset.textContent = 'Jogar novamente?'
-        btnPlayer1.setAttribute('disabled', '');
-        btnPlayer2.setAttribute('disabled', '');
-        p.textContent = `Fim de jogo!! -> O jogador com mais rounds vencidos é: ${whoGameWon(whoWon)} PARABÉNS!!!`
+    
+    if (rounds === 10) {
+      btnReset.textContent = 'Jogar novamente?';
+      btnPlayer1.setAttribute('disabled', '');
+      btnPlayer2.setAttribute('disabled', '');
+      p.textContent = `Fim de jogo!! -> O jogador com mais rounds vencidos é: ${whoGameWon(whoWon)} PARABÉNS!!!`;
     }
-});
+    
+    updateGameState(); // Salvar dados atualizados no localStorage
+  });
+  
 
 btnReset.addEventListener('click', () => {
+    localStorage.clear();
     location.reload(true);
 })
-
-
-
-
-  
